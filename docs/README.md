@@ -134,7 +134,7 @@ This architecture demonstrates:
 
 ## Author
 
-**Chinnari**
+**Nallala Srilatha**
 
 ---
 
