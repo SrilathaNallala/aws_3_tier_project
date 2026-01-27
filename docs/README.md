@@ -1,116 +1,143 @@
-# AWS Multi-Region Warm Standby Web Application – Project
 
-## Overview
 
-This project is a real‑world AWS architecture designed to deploy a **highly available and disaster‑resilient web application** using a **Multi‑Region Warm Standby strategy**.
+## Architecture Overview
 
-The main idea behind this project is to ensure that the application continues to work even if an entire AWS region goes down. One region actively serves users, while another region is always ready to take over with minimal downtime.
+This document explains the **architecture design** of my project in a simple and practical way. The goal of this architecture is to build a **highly available, secure, and disaster-resilient web application** using AWS services.
 
-This project focuses more on **cloud architecture, scalability, security, and disaster recovery** rather than application‑level features.
+The architecture follows a **Multi-Region Warm Standby strategy**, where one AWS region actively serves users and another region remains ready to take over during failures.
 
 ---
 
-## Why I Built This Project
+## Why This Architecture Was Chosen
 
-I built this project to:
+I chose this architecture to solve common real-world problems such as:
 
-* Understand how real production systems are designed on AWS
-* Learn multi‑region architecture and disaster recovery concepts
-* Practice using core AWS services together
-* Prepare for DevOps / Cloud interviews with a strong hands‑on project
+* Application downtime due to regional failures
+* Traffic spikes during peak usage
+* Security threats like DDoS and web attacks
+* Data loss during unexpected failures
 
----
-
-## High‑Level Architecture
-
-The architecture consists of:
-
-* A **Primary Region** that handles all production traffic
-* A **Secondary Region (Warm Standby)** that remains ready to serve traffic during failures
-* Global AWS services that route and protect traffic
+This design balances **cost, availability, and reliability**, making it suitable for production workloads.
 
 ---
 
-## Traffic Flow (Simple Explanation)
+## High-Level Design
 
-1. Users access the application using a domain name
-2. **Amazon Route 53** resolves the DNS request
-3. Traffic goes through **CloudFront**, which improves performance and enables HTTPS
-4. **AWS WAF** filters malicious requests
-5. Requests are forwarded to an **Application Load Balancer**
-6. The load balancer distributes traffic to EC2 instances in Auto Scaling Groups
-7. Backend services communicate with the **Amazon RDS database**
+The architecture is divided into three main layers:
+
+1. **Global Layer** – Handles routing, security, and content delivery
+2. **Regional Layer** – Hosts application infrastructure in each region
+3. **Data Layer** – Manages databases, backups, and replication
 
 ---
 
-## AWS Services Used and Their Purpose
+## Global Layer (Common for All Regions)
 
-### Global Services
+### Amazon Route 53
 
-* **Route 53** – DNS routing and health checks
-* **CloudFront** – Content delivery and SSL termination
-* **AWS WAF** – Web application security
+* Routes user traffic using DNS
+* Performs health checks on the application
+* Redirects traffic to the standby region during failures
+
+### Amazon CloudFront
+
+* Serves content with low latency
+* Provides HTTPS using SSL certificates
+* Acts as an additional security layer
+
+### AWS WAF
+
+* Protects the application from common web attacks
+* Blocks malicious IPs and suspicious requests
+
+---
+
+## Regional Layer (Primary & Secondary Regions)
+
+Each region contains similar infrastructure to ensure quick failover.
 
 ### Networking
 
-* **VPC** with public and private subnets
-* **NAT Gateway** for secure outbound internet access
-* **Bastion Host** for controlled administrative access
+* Dedicated VPC in each region
+* Public subnets for load balancers
+* Private subnets for application and database layers
+* NAT Gateway for secure outbound access
 
-### Compute & Scaling
+### Compute Layer
 
-* **EC2 instances** for Web and Application tiers
-* **Auto Scaling Groups** to handle traffic fluctuations
-* **Application Load Balancer** for distributing traffic
+* EC2 instances for Web Tier (Frontend)
+* EC2 instances for App Tier (Backend)
+* Auto Scaling Groups to handle load automatically
 
-### Database
+### Load Balancing
 
-* **Amazon RDS** as the primary database
-* **Cross‑Region Read Replica** in the DR region
-
-### Backup & Recovery
-
-* **AWS Backup** for automated backups
-* Cross‑region backup replication for data safety
+* Application Load Balancer distributes traffic across instances
+* Ensures fault tolerance within the region
 
 ---
 
-## Disaster Recovery Strategy – Warm Standby
+## Data Layer
 
-* The primary region actively serves users
-* The secondary region runs minimal infrastructure and stays in sync
-* Route 53 health checks monitor application health
-* During a regional failure, traffic is redirected to the standby region
-* The database replica can be promoted if required
+### Amazon RDS
 
-This approach provides a good balance between **cost and availability**.
+* Primary database runs in the main region
+* Read Replica exists in the standby region
+* Supports quick promotion during disasters
 
----
+### Backup Strategy
 
-## Key Design Decisions
-
-* The application is **stateless**, allowing Auto Scaling
-* No hardcoded IP addresses or credentials
-* Managed AWS services are preferred to reduce operational overhead
-* Security is enforced at multiple layers
+* Automated backups using AWS Backup
+* Cross-region backup replication
+* Ensures data recovery even during regional outages
 
 ---
 
-## What This Project Demonstrates
+## Disaster Recovery – Warm Standby Strategy
 
-* Real‑world AWS architecture knowledge
-* High availability and fault tolerance
-* Disaster recovery planning
-* Understanding of DevOps and cloud best practices
+* Primary region handles all production traffic
+* Secondary region runs minimal resources
+* Health checks detect regional failures
+* Route 53 shifts traffic to the standby region
+* Database replica is promoted if needed
+
+This approach reduces recovery time while controlling infrastructure costs.
+
+---
+
+## Security Considerations
+
+* Application runs mostly in private subnets
+* Bastion host used for controlled administrative access
+* IAM roles used instead of hardcoded credentials
+* Multiple security layers (WAF, SGs, NACLs)
+
+---
+
+## Scalability and Reliability
+
+* Auto Scaling ensures the application scales based on demand
+* Load balancers distribute traffic evenly
+* Stateless application design enables easy scaling and failover
+
+---
+
+## Key Takeaways
+
+This architecture demonstrates:
+
+* Real-world AWS system design
+* High availability and disaster recovery planning
+* Secure and scalable cloud infrastructure
+* DevOps and cloud best practices
 
 ---
 
 ## Author
 
-**Nallala Srilatha**
+**Chinnari**
 
 ---
 
-## Final Note
+## Final Thoughts
 
-This project is intended to demonstrate **cloud design and operational thinking** rather than application development. It reflects how modern web applications are built and protected in production AWS environments.
+This architecture reflects how modern cloud-native applications are built on AWS. It focuses on reliability, security, and operational efficiency rather than just application code.
