@@ -1,85 +1,116 @@
-# 🏗️ 3-Tier AWS Architecture with Disaster Recovery
+# AWS Multi-Region Warm Standby Web Application – Project
 
-This project is built using a **3-tier AWS architecture**.  
-It separates the system into three layers: **Web Tier (frontend)**, **Application Tier (backend)**, and **Database Tier (data storage)**.  
+## Overview
 
-The setup is deployed in **two AWS regions**:
-- **Primary Region (us-east-1)** → Handles live traffic.
-- **Disaster Recovery Region (us-west-2)** → Warm standby, used only if the primary region fails.
+This project is a real‑world AWS architecture designed to deploy a **highly available and disaster‑resilient web application** using a **Multi‑Region Warm Standby strategy**.
 
----
+The main idea behind this project is to ensure that the application continues to work even if an entire AWS region goes down. One region actively serves users, while another region is always ready to take over with minimal downtime.
 
-## 📌 Architecture Diagram
-![Architecture Diagram](docs/architecture.png)
+This project focuses more on **cloud architecture, scalability, security, and disaster recovery** rather than application‑level features.
 
 ---
 
-## 🔹 How It Works
+## Why I Built This Project
 
-### 1. Client Access
-- Users connect through **Route 53 (DNS)** which decides where traffic goes.  
-- **AWS WAF (Firewall)** protects the app from attacks.  
-- **CloudFront (CDN)** makes content load faster for users worldwide.  
+I built this project to:
 
----
-
-### 2. Primary Region (us-east-1)
-
-- **Public Subnet**
-  - A **Bastion Host (EC2)** is used for secure admin access.
-  - **NAT Gateway** allows private servers to connect to the internet safely.
-
-- **Web Tier**
-  - Runs on **EC2 instances** (web servers).  
-  - Managed by an **Auto Scaling Group** for handling more/less traffic.  
-  - **Load Balancer** spreads traffic across servers.  
-
-- **Application Tier**
-  - Runs business logic on **EC2 instances**.  
-  - Also behind a **Load Balancer** with Auto Scaling.  
-
-- **Database Tier**
-  - **Amazon RDS (Relational Database)** is deployed in **Multi-AZ** for high availability.  
-  - One DB is primary, another is standby in a different AZ for failover.  
-
-- **Backup**
-  - **AWS Backup** regularly saves EC2 and RDS snapshots.  
-  - A **Cross-Region Replica** keeps a copy of the database in the DR region.  
+* Understand how real production systems are designed on AWS
+* Learn multi‑region architecture and disaster recovery concepts
+* Practice using core AWS services together
+* Prepare for DevOps / Cloud interviews with a strong hands‑on project
 
 ---
 
-### 3. Disaster Recovery Region (us-west-2)
+## High‑Level Architecture
 
-- Same structure as the primary (web, app, db layers).  
-- Runs in **warm standby** → smaller capacity to save cost, but ready to scale up if needed.  
-- **RDS Replica** keeps data synced from the primary region.  
-- **Backups** can be restored here if needed.  
-- **Route 53** will switch traffic here if the primary goes down.  
+The architecture consists of:
 
----
-
-## 🔹 Key AWS Services Used
-- **Route 53** → Routes traffic and does health checks.  
-- **WAF** → Protects against common attacks.  
-- **CloudFront** → Faster content delivery.  
-- **EC2 + Auto Scaling + Load Balancers** → Scalable web & app servers.  
-- **RDS (Multi-AZ + Cross-Region Replica)** → Reliable database with failover.  
-- **AWS Backup** → Automatic backups.  
-- **VPC, Subnets, NAT, Bastion Host** → Secure network design.  
+* A **Primary Region** that handles all production traffic
+* A **Secondary Region (Warm Standby)** that remains ready to serve traffic during failures
+* Global AWS services that route and protect traffic
 
 ---
 
-## 🔹 Why This Architecture?
-- **Scalable** → Auto Scaling adjusts servers based on demand.  
-- **Highly Available** → Multi-AZ ensures no single point of failure.  
-- **Secure** → WAF, Bastion, private subnets, and IAM roles.  
-- **Disaster Recovery Ready** → Warm standby in another region.  
-- **Fast** → CloudFront CDN for global users.  
+## Traffic Flow (Simple Explanation)
+
+1. Users access the application using a domain name
+2. **Amazon Route 53** resolves the DNS request
+3. Traffic goes through **CloudFront**, which improves performance and enables HTTPS
+4. **AWS WAF** filters malicious requests
+5. Requests are forwarded to an **Application Load Balancer**
+6. The load balancer distributes traffic to EC2 instances in Auto Scaling Groups
+7. Backend services communicate with the **Amazon RDS database**
 
 ---
 
-## 🔹 Failover in Simple Words
-1. Normally, users connect to **us-east-1** (primary).  
-2. If it fails, **Route 53** detects the issue.  
-3. Traffic is redirected to **us-west-2** (DR region).  
-4. The **database replica** in DR takes over, and services continue with minimal downtime.  
+## AWS Services Used and Their Purpose
+
+### Global Services
+
+* **Route 53** – DNS routing and health checks
+* **CloudFront** – Content delivery and SSL termination
+* **AWS WAF** – Web application security
+
+### Networking
+
+* **VPC** with public and private subnets
+* **NAT Gateway** for secure outbound internet access
+* **Bastion Host** for controlled administrative access
+
+### Compute & Scaling
+
+* **EC2 instances** for Web and Application tiers
+* **Auto Scaling Groups** to handle traffic fluctuations
+* **Application Load Balancer** for distributing traffic
+
+### Database
+
+* **Amazon RDS** as the primary database
+* **Cross‑Region Read Replica** in the DR region
+
+### Backup & Recovery
+
+* **AWS Backup** for automated backups
+* Cross‑region backup replication for data safety
+
+---
+
+## Disaster Recovery Strategy – Warm Standby
+
+* The primary region actively serves users
+* The secondary region runs minimal infrastructure and stays in sync
+* Route 53 health checks monitor application health
+* During a regional failure, traffic is redirected to the standby region
+* The database replica can be promoted if required
+
+This approach provides a good balance between **cost and availability**.
+
+---
+
+## Key Design Decisions
+
+* The application is **stateless**, allowing Auto Scaling
+* No hardcoded IP addresses or credentials
+* Managed AWS services are preferred to reduce operational overhead
+* Security is enforced at multiple layers
+
+---
+
+## What This Project Demonstrates
+
+* Real‑world AWS architecture knowledge
+* High availability and fault tolerance
+* Disaster recovery planning
+* Understanding of DevOps and cloud best practices
+
+---
+
+## Author
+
+**Nallala Srilatha**
+
+---
+
+## Final Note
+
+This project is intended to demonstrate **cloud design and operational thinking** rather than application development. It reflects how modern web applications are built and protected in production AWS environments.
