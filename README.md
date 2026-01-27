@@ -107,7 +107,7 @@ This approach provides a good balance between **cost and availability**.
 
 ## Author
 
-**Chinnari**
+**Nallala Srilatha**
 
 ---
 
